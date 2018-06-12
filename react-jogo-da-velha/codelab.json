@@ -1,0 +1,25 @@
+{
+  "environment": "web",
+  "source": "1r0NDGM-4MiJ2TBinV_3-Pe1elRmOidIfp20PEFGGDo8",
+  "format": "html",
+  "prefix": "../../",
+  "mainga": "UA-120783401-1",
+  "updated": "2018-06-12T23:32:33Z",
+  "id": "react-jogo-da-velha",
+  "duration": 0,
+  "title": "React Jogo da velha",
+  "author": "geovanisouza92",
+  "summary": "Nesse codelab, você vai criar um jogo da velha usando React, aprender os conceitos básicos desse framework e como trabalhar com propriedades e estado.",
+  "theme": "web",
+  "status": [
+    "draft"
+  ],
+  "category": [
+    "Web"
+  ],
+  "tags": [
+    "web"
+  ],
+  "feedback": "https://classroom.google.com/c/MTExODQ5OTA1MTVa",
+  "url": "react-jogo-da-velha"
+}

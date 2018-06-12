@@ -1,0 +1,221 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>React Jogo da velha</title>
+  <script src="../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../../elements/codelab.html">
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <style is="custom-style">
+    body {
+      font-family: "Roboto",sans-serif;
+      background: var(--google-codelab-background, #F8F9FA);
+    }
+  </style>
+  
+</head>
+<body unresolved class="fullbleed">
+
+  <google-codelab title="React Jogo da velha"
+                  environment="web"
+                  feedback-link="https://classroom.google.com/c/MTExODQ5OTA1MTVa">
+    
+      <google-codelab-step label="Antes de começarmos" duration="0">
+        <p>Hoje vamos criar um jogo da velha interativo.</p>
+<p>Se quiser, pode visualizar o resultado final <a href="http://todo" target="_blank">aqui</a>. Não se preocupe se o código ainda não fizer sentido para você, ou se ele usa uma sintaxe não familiar. Vamos aprender como criar esse jogo, passo a passo, através desse tutorial.</p>
+<p>Comece jogando o jogo. Você pode clicar no botão de &#34;Desfazer&#34; e ver como o tabuleiro era antes do movimento ser executado.</p>
+<p>Quando você se tornar familiar com o jogo, fique a vontade para fechar a aba, pois vamos começar com um modelo mais simples nas próximas seções.</p>
+<h2><strong>Pré-requisitos</strong></h2>
+<p>Vamos assumir que você tem familiaridade com HTML e JavaScript, mas se você deve ser capaz de seguir em frente mesmo que você não os tenha usado antes.</p>
+<p>Se você precisa de uma revisão de JavaScript, recomendamos <a href="https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/A_re-introduction_to_JavaScript" target="_blank">esse guia</a>. Note que vamos usar funcionalidades do ES6, uma versão recente do JavaScript. Nesse tutorial, we&#39;re using <a href="https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Functions/Arrow_functions" target="_blank">funções de seta</a>, <a href="https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Classes" target="_blank">classes</a>, <a href="https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Statements/let" target="_blank">let</a> e <a href="https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Statements/const" target="_blank">const</a>.</p>
+<h2><strong>Como seguir adiante</strong></h2>
+<p>Há duas formas de completar esse tutorial: você pode escrever o código diretamente no navegador (recomendado), ou você pode configurar um ambiente de desenvolvimento na sua máquina. Você pode escolher a opção com a qual se sentir mais confortável.</p>
+<h2><strong>Se preferir escrever o código no navegador</strong></h2>
+<p>Este é o jeito mais rápido de começar!</p>
+<p>Primeiro, abra <a href="https://stackblitz.com/edit/react-jogo-da-velha" target="_blank">este código inicial</a> em uma nova aba. Ele deve mostrar um jogo da velha vazio. Nós vamos editar este código durante este tutorial.</p>
+<p>Você pode pular dessa seção de como configurar o ambiente local direto para a Visão geral.</p>
+<h2><strong>Se preferir escrever o código no navegador</strong></h2>
+<p>Alternativamente, você pode configurar esse projeto no seu computador.</p>
+<aside class="warning"><p>Isso é completamente opcional e não é requisito para este tutorial!</p>
+</aside>
+<p>Isso dá mais trabalho, mas permite que você aproveite o conforto do seu editor.</p>
+<p>Se você quer fazê-lo, aqui estão os passos necessários:</p>
+<p>- Tenha certeza que tem uma versão do <a href="https://nodejs.org/en/" target="_blank">Node.js</a> instalado.</p>
+<p>- Siga as <a href="https://reactjs.org/docs/add-react-to-a-new-app.html" target="_blank">instruções de instalação</a> para criar um novo projeto.</p>
+<pre><code>npm install -g create-react-app
+create-react-app meu-jogo-da-velha</code></pre>
+<p>- Apague todos os arquivos da pasta <code>src/</code> (não apague a pasta, apenas o conteúdo).</p>
+<pre><code>cd meu-jogo-da-velha
+rm -f src/*</code></pre>
+<p>- Adicione um arquivo <code>style.css</code> na pasta <code>src/</code> com <a href="https://stackblitz.com/edit/react-jogo-da-velha?embed=1&file=style.css&view=editor" target="_blank">esse código CSS</a>.</p>
+<p>- Adicione um arquivo <code>index.js</code> na pasta <code>src/</code> com <a href="https://stackblitz.com/edit/react-jogo-da-velha?embed=1&file=index.js&view=editor" target="_blank">esse código JS</a>.</p>
+<p>Agora se você executar </p>
+<pre>npm start</pre>
+<p>na pasta do projeto e abrir <a href="http://localhost:3000" target="_blank">http://localhost:3000</a> no navegador, deve ver um jogo da velha em branco.</p>
+<h2><strong>Me ajuda, fiquei preso(a)!</strong></h2>
+<p>Se você ficar preso em algum passo, peça ajuda no <a href="https://classroom.google.com/c/MTExODQ5OTA1MTVa" target="_blank">fórum da aula</a>.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Visão geral" duration="0">
+        <h2><strong>O que é React?</strong></h2>
+<p>React é uma biblioteca JavaScript declarativa, eficiente e flexível para criar interfaces de usuário.</p>
+<p>React tem diferentes tipos de componentes, mas vamos começar com subclasses de React.Component:</p>
+<pre><code>class ShoppingList extends React.Component {
+  render() {
+    return (
+      &lt;div className=&#34;shopping-list&#34;&gt;
+        &lt;h1&gt;Shopping List for {this.props.name}&lt;/h1&gt;
+        &lt;ul&gt;
+          &lt;li&gt;Instagram&lt;/li&gt;
+          &lt;li&gt;WhatsApp&lt;/li&gt;
+          &lt;li&gt;Oculus&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+    );
+  }
+}
+
+// Examplo de uso: &lt;ShoppingList name=&#34;Mark&#34; /&gt;</code></pre>
+<p>Já vamos chegar nessas tags XML engraçadas num momento. Seu componente diz ao React o que você quer renderizar - então o React vai eficientemente atualizar e renderizar os componentes apenas quando seus dados mudarem.</p>
+<p>Aqui, <code>ShoppingList</code> é uma classe componente React, ou um tipo de componente React. Um componente recebe parâmetros, chamados <em>props</em> (propriedades), e retorna uma hierarquia de elementos para exibir através do método <code>render</code>.</p>
+<p>O método <code>render</code> retorna uma descrição do que você quer renderizar, e então o React toma essa descrição e a renderiza na tela. Em particular, o método <code>render</code> retorna um <em>React element</em>, que é uma descrição simplificada do que renderizar. A maioria dos desenvolvedores React usam uma sintaxe especial chamada <em>JSX </em>que torna mais simples escrever essas estruturas. A sintaxe <code>&lt;div/&gt;</code> é transformada em tempo de compilação em <code>React.createElement(‘d</code>iv&#39;). O exemplo acima é equivalente a:</p>
+<pre><code>return React.createElement(&#39;div&#39;, {className: &#39;shopping-list&#39;},
+  React.createElement(&#39;h1&#39;, /* ... filhos do h1 ... */),
+  React.createElement(&#39;ul&#39;, /* ... filhos do ul ... */)
+);</code></pre>
+<p><a href="https://babeljs.io/repl/#?presets=react&code_lz=DwEwlgbgBAxgNgQwM5IHIILYFMC8AiJACwHsAHUsAOwHMBaOMJAFzwD4AoKKYQgRlYDKJclWpQAMoyZQAZsQBOUAN6l5ZJADpKmLAF9gAej4cuwAK5wTXbg1YBJSswTV5mQ7c7XgtgOqEETEgAguTuYFamtgDyMBZmSGFWhhYchuAQrADc7EA" target="_blank"><paper-button class="colored" raised>Veja a versão completa aqui</paper-button></a></p>
+<p>Se você está curioso, <code>createElement()</code> é descrito em mais detalhes na referência da API, mas não vamos usá-lo diretamente neste tutorial. Ao invés, vamos continuar usando <em>JSX</em>.</p>
+<p>Você pode inserir qualquer expressão JavaScript entre chaves dentro do <em>JSX</em>. Cada elemento React é um objeto JavaScript real onde você pode adicionar variáveis e passá-lo através do seu programa.</p>
+<p>O componente <code>ShoppingList</code> apenas renderiza elementos DOM padrão, mas você pode criar elementos customizados com React tão facilmente, ao escrever <code>&lt;ShoppingList/&gt;</code>. Cada componente é encapsulado e pode operar independentemente, o que permite consturir interfaces de usuário (UI) complexas a partir de componentes simples.</p>
+<h2><strong>Começando</strong></h2>
+<p>Começe com esse examplo: <a href="https://stackblitz.com/edit/react-jogo-da-velha" target="_blank">código inicial</a>.</p>
+<p>Ele contém a estrutura do que vamos construir hoje. Nós já fornecemos os estilos, então você só precisa se preocupar com o JavaScript.</p>
+<p>Em especial, temos três componentes:</p>
+<ul>
+<li>Square</li>
+<li>Board</li>
+<li>Game</li>
+</ul>
+<p>O componente <em>Square</em> (quadrado) renderiza um simples <code>&lt;button&gt;</code>, o <em>Board</em> (tabuleiro) renderiza 9 quadrados, e o componente <em>Game</em> (jogo) renderiza o tabuleiro com alguns espaços que vamos preencher depois. Nenhum desses componentes é interativo nesse momento.</p>
+<h2><strong>Passando dados através de props</strong></h2>
+<p>Apenas para se molhar, vamos tentar passar alguns dados para do componente <em>Board</em> para o componente <em>Square</em>:</p>
+<pre><code>class Board extends React.Component {
+  renderSquare(i) {
+    Return &lt;Square value={i} /&gt;;
+  }</code></pre>
+<p>Então modificar o método <em>render</em> do componente <em>Square</em> para mostrar o valor substituindo <code>{/* TODO */}</code> com <code>{this.props.value}</code>.</p>
+<pre><code>class Square extends React.Component {
+  render() {
+    return (
+      &lt;button className=&#34;square&#34;&gt;
+        {this.props.value}
+      &lt;/button&gt;
+    )
+  }
+}</code></pre>
+<p>Antes:</p>
+<p><img style="max-width: 254.00px" src="img/954d18c14976c42c.png"></p>
+<p>Depois: Você pode ver o número de cada quadrado na saída renderizada.</p>
+<p><img style="max-width: 270.00px" src="img/3cb3b9814369ee27.png"></p>
+<h2><strong>Um componente interativo</strong></h2>
+<p>Vamos mudar o componente <em>Square</em> preenchendo um &#34;X&#34; quando você clica nele. Tente modificar a tag button retornada no método <code>render()</code> do <em>Square</em> desse jeito:</p>
+<pre><code>class Square extends React.Component {
+  render() {
+    return (
+      &lt;button className=&#34;square&#34; onClick={() =&gt; alert(&#39;click&#39;)}&gt;
+        {this.props.value}
+      &lt;/button&gt;
+    );
+  }
+}</code></pre>
+<p>Se você clicar no quadrado agora, você deve ver um alerta no navegador.</p>
+<p>Isso usa a nova sintaxe do JavaScript para <a href="https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Functions/Arrow_functions" target="_blank">função de seta</a>. Repare que estamos passando uma função na propriedade <code>onClick</code>. Ao clicar, um alerta vai aparecer imediatamente ao invés do clique do botão.</p>
+<p>Componentes React podem ter um estado ao definir <code>this.state</code> no construtor, que deve ser considerado privado ao componente. Vamos armazenar o valor do quadrado no estado, e modificá-lo quando o botão é clicado.</p>
+<pre><code>class Square extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: null,
+    };
+  }
+
+  render() {
+    return (
+      &lt;button className=&#34;square&#34; onClick={() =&gt; alert(&#39;click&#39;)}&gt;
+        {this.props.value}
+      &lt;/button&gt;
+    );
+  }
+}</code></pre>
+<p>Em <a href="https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Classes" target="_blank">classes</a> JavaScript, você precisa chamar o <code>super();</code> explicitamente ao definir uma subclasse.</p>
+<p>Agora mude o método <code>render</code> do <em>Square</em> para exibir o valor atual do estado, e modificá-lo ao clicar.</p>
+<ul>
+<li>Substitua <code>this.props.value</code> com <code>this.state.value</code> dentro da tag <code>&lt;button&gt;</code>.</li>
+<li>Substitua o <code>() =&gt; alert()</code> com <code>() =&gt; this.setState({ value: ‘</code>X&#39; }).</li>
+</ul>
+<p>Agora o <code>&lt;button&gt;</code> se parece com isso:</p>
+<pre><code>class Square extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: null,
+    };
+  }
+
+  render() {
+    return (
+      &lt;button className=&#34;square&#34; onClick={() =&gt; this.setState({value: &#39;X&#39;})}&gt;
+        {this.state.value}
+      &lt;/button&gt;
+    );
+  }
+}</code></pre>
+<p>Sempre que <code>this.setState</code> é chamado, um update ao componente é agendado, fazendo o React combinar a atualização de estado passado e renderizar o componente junto com seus descendentes. Quando o componente re-renderiza, <code>this.props.value</code> var ser <code>�</code>��X&#39; então você verá um X na grade.</p>
+<p>Se você clicar em qualquer quadrado, um X deve aparecer nele.</p>
+<h2><strong>Ferramentas de desenvolvimento</strong></h2>
+<p>A extensão para Chrome e Firefox React Devtools permite que você inspecione uma árvore de componentes no seu navegador.</p>
+<p><img style="max-width: 364.00px" src="img/bfd4e4a8dd98d4f1.png"></p>
+<p>Isso lhe permite inspecionar props e estado de qualquer componente na árvore.</p>
+<p>Depois de instalá-la, você pode clicar em qualquer parte da página, clicar em &#34;Inspecionar&#34; para abrir as ferramentas de desenvolvimento, e a aba React vai aparecer como a última da direita.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-120783401-1', 'auto');
+
+    (function() {
+      var gaCodelab = '';
+      if (gaCodelab) {
+        ga('create', gaCodelab, 'auto', {name: 'codelab'});
+      }
+
+      var gaView;
+      var parts = location.search.substring(1).split('&');
+      for (var i = 0; i < parts.length; i++) {
+        var param = parts[i].split('=');
+        if (param[0] === 'viewga') {
+          gaView = param[1];
+          break;
+        }
+      }
+      if (gaView && gaView !== gaCodelab) {
+        ga('create', gaView, 'auto', {name: 'view'});
+      }
+    })();
+  </script>
+
+</body>
+</html>
