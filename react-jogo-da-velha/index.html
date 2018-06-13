@@ -22,7 +22,7 @@
 
   <google-codelab title="React Jogo da velha"
                   environment="web"
-                  feedback-link="https://classroom.google.com/c/MTExODQ5OTA1MTVa">
+                  feedback-link="https://github.com/geovanisouza92/codelabs/issues">
     
       <google-codelab-step label="Antes de começarmos" duration="0">
         <p>Hoje vamos criar um jogo da velha interativo.</p>
@@ -183,6 +183,180 @@ rm -f src/*</code></pre>
 <p><img style="max-width: 364.00px" src="img/bfd4e4a8dd98d4f1.png"></p>
 <p>Isso lhe permite inspecionar props e estado de qualquer componente na árvore.</p>
 <p>Depois de instalá-la, você pode clicar em qualquer parte da página, clicar em &#34;Inspecionar&#34; para abrir as ferramentas de desenvolvimento, e a aba React vai aparecer como a última da direita.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Levando o estado acima" duration="0">
+        <p>Temos agora os blocos básicos para criar o jogo da velha. Mas agora, o estado está encapsulado em cada componente <em>Square</em>. Para fazê-lo funcionar corretamente, temos que checar se um jogador ganhou, e alternar o preenchimento com X e O nos quadrados. Para verificar se alguém ganhou, vamos ter o valor de todos os 9 quadrados em um lugar, ao invés de dividi-lo em cada componente <em>Square</em>.</p>
+<p>Você deve pensar que o <em>Board</em> só pergunta o estado atual de cada <em>Square</em>. Apesar disso ser tecnicamente possível com React, é desencorajado, pois isso tende a tornar o código difícil de entender, mais frágil, e difícil de refatorar.</p>
+<p>Ao invés disso, a melhor solução é armazenar o estado no componente <em>Board</em> ao invés de cada <em>Square</em> - e o componente <em>Board</em> pode chamar cada <em>Square</em> para exibí-lo, como fizemos cada um exibir seu índice antes.</p>
+<p><strong>Quando você quer agregas dados de vários filhos ou quer comunicar dois componentes entre eles, mova o estado para o componente pai. O pai então passa o estado de volta para cada filho via props, então o componente filho vari sempre estar sincronizado com cada outro do seu pai.</strong></p>
+<p>Empurrando o estado acima é comum quando refatorar componentes React, então vamos tomar a oportunidade para tentar. Adicione um construtor ao <em>Board</em> e defina seu estado inicial como uma lista contendo 9 <em>nulls</em>, correspondendo a cada um dos 9 quadrados:</p>
+<pre><code>class Board extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      squares: Array(9).fill(null),
+    };
+  }
+
+  renderSquare(i) {
+    return &lt;Square value={i} /&gt;;
+  }
+
+  render() {
+    const status = &#39;Next player: X&#39;;
+
+    return (
+      &lt;div&gt;
+        &lt;div className=&#34;status&#34;&gt;{status}&lt;/div&gt;
+        &lt;div className=&#34;board-row&#34;&gt;
+          {this.renderSquare(0)}
+          {this.renderSquare(1)}
+          {this.renderSquare(2)}
+        &lt;/div&gt;
+        &lt;div className=&#34;board-row&#34;&gt;
+          {this.renderSquare(3)}
+          {this.renderSquare(4)}
+          {this.renderSquare(5)}
+        &lt;/div&gt;
+        &lt;div className=&#34;board-row&#34;&gt;
+          {this.renderSquare(6)}
+          {this.renderSquare(7)}
+          {this.renderSquare(8)}
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  }
+}</code></pre>
+<p>Nós vamos preenchê-lo depois de tal forma que o <em>board</em> se pareça com</p>
+<pre><code>[
+  &#39;O&#39;, null, &#39;X&#39;,
+  &#39;X&#39;, &#39;X&#39;, &#39;O&#39;,
+  &#39;O&#39;, null, null,
+]</code></pre>
+<p>O método <code>renderSquare</code> do <em>Board</em> se parece com isso:</p>
+<pre><code>  renderSquare(i) {
+    return &lt;Square value={i} /&gt;;
+  }</code></pre>
+<p>Modifique-o e passe uma prop <code>value</code> para o <em>Square</em>.</p>
+<pre><code>  renderSquare(i) {
+    return &lt;Square value={this.state.squares[i]} /&gt;;
+  }</code></pre>
+<p>Agora você precisa mudar o que acontece quando o quadrado é clicado. O componente <em>Board</em> agora armazena quais quadrados estão preenchidos, o que quer dizer que precisamos de alguma forma do <em>Square</em> atualizar o estado do <em>Board</em>. Como o estado do componente é considerado privado, não podemos atualizar o estado do <em>Board</em> diretamente do <em>Square</em>.</p>
+<p>O padrão comum aqui é passar uma função do <em>Board</em> para o <em>Square</em> que é chamado quando quadrado é clicado. Modifique o método <code>renderSquare</code> do <em>Board</em> novamente para se parecer com isso:</p>
+<pre><code>  renderSquare(i) {
+    return (
+      &lt;Square
+        value={this.state.squares[i]}
+        onClick={() =&gt; this.handleClick(i)}
+      /&gt;
+    );
+  }</code></pre>
+<p>Nós dividimos o elemento retornado em múltiplas linhas para facilitar a leitura, então adicionamos parênteses em torno para que o JavaScript não insira um ponto-e-vírgula depois do <code>return</code> e quebre nosso código.</p>
+<p>Agora passamos abaixo duas props do <em>Board</em> para o <em>Square</em>: <code>value</code> e <code>onClick</code>. O último é a função que o <em>Square</em> pode chamar. Vamos fazer as seguintes mudanças no <em>Square</em>:</p>
+<ul>
+<li>Substitua <code>this.state.value</code> com <code>this.props.value</code> no <code>render</code> do <em>Square</em>.</li>
+<li>Substitua <code>this.setState()</code> com <code>this.props.onClick()</code> no render do <em>Square</em>.</li>
+<li>Remova o construtor do <em>Square</em> pois não vamos ter mais estado.</li>
+</ul>
+<p>Depois dessas mudanças, o componente <em>Square</em> deve se parecer com isso:</p>
+<pre><code>class Square extends React.Component {
+  render() {
+    return (
+      &lt;button className=&#34;square&#34; onClick={() =&gt; this.props.onClick()}&gt;
+        {this.props.value}
+      &lt;/button&gt;
+    );
+  }
+}</code></pre>
+<p>Agora, quando o quadrado é clicado, ele chama a função onClick que é passada pelo <em>Board</em>. Vamos recapitular o que acontece aqui:</p>
+<ol type="1" start="1">
+<li>A prop <code>onClick</code> do componente da DOM <code>&lt;button&gt;</code> chama o React para configurar um ouvinte de evento clique.</li>
+<li>Quando o botão é clicado, o React chama o receptor de evento <code>onClick</code> definido no método <code>render()</code> do <em>Square</em>.</li>
+<li>Este evento chama <code>this.props.onClick()</code>. As props do <em>Square</em> são especificadas pelo <em>Board</em>.</li>
+<li>O <em>Board</em> passa <code>onClick={() =&gt; this.handleClick(i)}</code> para o <em>Square</em>, então quando chamado, ele executa <code>this.handleClick(i)</code> no <em>Board</em>.</li>
+<li>Nós não definimos ainda o método <code>handleClick()</code> no <em>Board</em> ainda, então nosso código quebra.</li>
+</ol>
+<p>Repare que o evento <code>onClick</code> do elemento <code>&lt;button&gt;</code> do DOM tem um significado especial no React, mas nós podemos nomear a prop <code>onClick</code> do <em>Square</em> ou o <code>handleClick</code> do <em>Board</em> de forma diferente. Contudo, a convenção no React é de usar nomes para atributos <code>on*</code> e <code>handle*</code> para os métodos receptores de eventos.</p>
+<p>Tente clicar num quadrado - você deve receber um erro, pois não definimos o <code>handleClick</code> ainda. Adicione-o à classe <em>Board</em>.</p>
+<pre><code>class Board extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      squares: Array(9).fill(null),
+    };
+  }
+
+  handleClick(i) {
+    const squares = this.state.squares.slice();
+    squares[i] = &#39;X&#39;;
+    this.setState({squares: squares});
+  }
+
+  renderSquare(i) {
+    return (
+      &lt;Square
+        value={this.state.squares[i]}
+        onClick={() =&gt; this.handleClick(i)}
+      /&gt;
+    );
+  }
+
+  render() {
+    const status = &#39;Next player: X&#39;;
+
+    return (
+      &lt;div&gt;
+        &lt;div className=&#34;status&#34;&gt;{status}&lt;/div&gt;
+        &lt;div className=&#34;board-row&#34;&gt;
+          {this.renderSquare(0)}
+          {this.renderSquare(1)}
+          {this.renderSquare(2)}
+        &lt;/div&gt;
+        &lt;div className=&#34;board-row&#34;&gt;
+          {this.renderSquare(3)}
+          {this.renderSquare(4)}
+          {this.renderSquare(5)}
+        &lt;/div&gt;
+        &lt;div className=&#34;board-row&#34;&gt;
+          {this.renderSquare(6)}
+          {this.renderSquare(7)}
+          {this.renderSquare(8)}
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  }
+}</code></pre>
+<p>Nós chamamos o método <code>.slice()</code> para copiar a lista <code>squares</code> ao invés de modificar a lista existente. Pule para a seção seguinte para entender por quê a imutabilidade é importante.</p>
+<p>Agora nós devemos ser capazes de clicar em um quadrado para preenchê-lo novamente, mas o estado é armazenado no componente <em>Board</em> ao invés de cada <em>Square</em>, o que nos permite continuar a construir nosso jogo. Note que sempre que o estado do <em>Board</em> é modificado, os componentes <em>Square</em> são re-renderizados automaticamente.</p>
+<p>O <em>Square</em> não mantém seu próprio estado mais; ele recebe o valor do seu pai <em>Board</em> e informa o pai quando é clicado. Chamamos isso de <strong>componentes controlados</strong>.</p>
+<h2>Por quê a imutabilidade é importante</h2>
+<p>No código de exemplo anterior, sugerimos usar o operator <code>.slice()</code> para copiar a lista <code>squares</code> antes de fazer uma mudança e evitar de modificar a lista existente. Vamos falar sobre o que isso quer dizer e por que é importante aprender esse conceito.</p>
+<p>Há geralmente duas formas de modificar dados. O primeiro método é <strong>modificar</strong> os dados diretamente modificando os valores de uma variável. O segundo método é <strong>substituir</strong> os dados com uma nova cóṕia do objeto que também inclua as modificações desejadas.</p>
+<h3><strong>Modificando dados com mutação</strong></h3>
+<pre><code>var player = {score: 1, name: &#39;Jeff&#39;};
+player.score = 2;
+// Now player is {score: 2, name: &#39;Jeff&#39;}</code></pre>
+<h3><strong>Modificando dados sem mutação</strong></h3>
+<pre><code>var player = {score: 1, name: &#39;Jeff&#39;};
+
+var newPlayer = Object.assign({}, player, {score: 2});
+// Now player is unchanged, but newPlayer is {score: 2, name: &#39;Jeff&#39;}
+
+// Or if you are using object spread syntax proposal, you can write:
+// var newPlayer = {...player, score: 2};</code></pre>
+<p>O resultado final é o mesmo, mas ao não modificar (ou trocar os dados internos) diretamente, nós agora temos um benefício adicional que pode ajudar a aumentar a performance do componente e da aplicação no geral.</p>
+<h3><strong>Facilita Desfazer/Refazer e Viagem no Tempo</strong></h3>
+<p>Imutabilidade também torna features complexas mais fáceis de implementar. Por exemplo, mais a frente nesse tutorial nós vamos implementar a viagem no tempo entre diferentes estágioso do jogo. Evitar mutações nos permite manter referências para versões antigas dos dados, e trocar entre elas se for necessário.</p>
+<h3><strong>Rastrear mudanças</strong></h3>
+<p>Determinar se um objeto foi modificado é complexo, pois modificações são feitas diretamente no objeto. Isso então requer comparar o objeto atual com uma cópia anterior, atravessar toda a estrutura do objeto, e comparar cada variável e valor. Esse processo pode se tornar incrivelmente complexo.</p>
+<p>Determinar como um objeto imutável foi modificado é muito mais fácil. Se o objeto sendo referenciado é diferente do anterior, então o objeto mudou. É isso. (No JavaScript, objetos e array são passados por referência, logo comparar essa referência [ponteiro] é rápido e simples)</p>
+<h3><strong>Determinar quando Re-renderizar no React</strong></h3>
+<p>O maior benefício da imutabilidade em React vem quando você quer construir <em>componentes puros</em>. Como a imutabilidade dos dados facilita a determinação se mudanças foram feitas, ela também ajuda a determinar quando um componente requer re-renderização.</p>
+<p>Para aprender mais sobre <code>shouldComponentUpdate()</code> e como construir <em>componentes puros</em>, dê uma olhada em <a href="https://reactjs.org/docs/optimizing-performance.html#examples" target="_blank">Otimizando a Performance</a>.</p>
+<h2><strong>Componentes Funcionais</strong></h2>
 
 
       </google-codelab-step>

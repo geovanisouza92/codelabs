@@ -4,7 +4,7 @@
   "format": "html",
   "prefix": "https://geovanisouza92.github.io/codelabs/",
   "mainga": "UA-120783401-1",
-  "updated": "2018-06-12T23:32:33Z",
+  "updated": "2018-06-13T00:55:38Z",
   "id": "react-jogo-da-velha",
   "duration": 0,
   "title": "React Jogo da velha",
@@ -20,6 +20,6 @@
   "tags": [
     "web"
   ],
-  "feedback": "https://classroom.google.com/c/MTExODQ5OTA1MTVa",
+  "feedback": "https://github.com/geovanisouza92/codelabs/issues",
   "url": "react-jogo-da-velha"
 }
