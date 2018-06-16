@@ -70,7 +70,7 @@ rm -f src/*</code></pre>
   render() {
     return (
       &lt;div className=&#34;shopping-list&#34;&gt;
-        &lt;h1&gt;Shopping List for {this.props.name}&lt;/h1&gt;
+        &lt;h1&gt;Lista de compras para {this.props.name}&lt;/h1&gt;
         &lt;ul&gt;
           &lt;li&gt;Instagram&lt;/li&gt;
           &lt;li&gt;WhatsApp&lt;/li&gt;
@@ -206,7 +206,7 @@ rm -f src/*</code></pre>
   }
 
   render() {
-    const status = &#39;Next player: X&#39;;
+    const status = &#39;Próximo jogador: X&#39;;
 
     return (
       &lt;div&gt;
@@ -305,7 +305,7 @@ rm -f src/*</code></pre>
   }
 
   render() {
-    const status = &#39;Next player: X&#39;;
+    const status = &#39;Próximo jogador: X&#39;;
 
     return (
       &lt;div&gt;
@@ -338,14 +338,14 @@ rm -f src/*</code></pre>
 <h3><strong>Modificando dados com mutação</strong></h3>
 <pre><code>var player = {score: 1, name: &#39;Jeff&#39;};
 player.score = 2;
-// Now player is {score: 2, name: &#39;Jeff&#39;}</code></pre>
+// Agora player é {score: 2, name: &#39;Jeff&#39;}</code></pre>
 <h3><strong>Modificando dados sem mutação</strong></h3>
 <pre><code>var player = {score: 1, name: &#39;Jeff&#39;};
 
 var newPlayer = Object.assign({}, player, {score: 2});
-// Now player is unchanged, but newPlayer is {score: 2, name: &#39;Jeff&#39;}
+// Agora o player é alterado, mas o novo jogador é {score: 2, name: &#39;Jeff&#39;}
 
-// Or if you are using object spread syntax proposal, you can write:
+// Ou se você quer usar a sintaxe de esparramar de objeto, você pode escrever:
 // var newPlayer = {...player, score: 2};</code></pre>
 <p>O resultado final é o mesmo, mas ao não modificar (ou trocar os dados internos) diretamente, nós agora temos um benefício adicional que pode ajudar a aumentar a performance do componente e da aplicação no geral.</p>
 <h3><strong>Facilita Desfazer/Refazer e Viagem no Tempo</strong></h3>
@@ -357,6 +357,468 @@ var newPlayer = Object.assign({}, player, {score: 2});
 <p>O maior benefício da imutabilidade em React vem quando você quer construir <em>componentes puros</em>. Como a imutabilidade dos dados facilita a determinação se mudanças foram feitas, ela também ajuda a determinar quando um componente requer re-renderização.</p>
 <p>Para aprender mais sobre <code>shouldComponentUpdate()</code> e como construir <em>componentes puros</em>, dê uma olhada em <a href="https://reactjs.org/docs/optimizing-performance.html#examples" target="_blank">Otimizando a Performance</a>.</p>
 <h2><strong>Componentes Funcionais</strong></h2>
+<p>Nós removemos o construtor, e de fato, o React suporta uma sintaxe mais simples chamada <strong>componentes funcionais</strong> para componentes como o <em>Square</em> que só consistem de um método <code>render</code>. Ao invés de definir uma classe estendendo <code>React.Component</code>, uma simples função que recebe props e retorna o que deve ser renderizado.</p>
+<p>Substitua a classe <em>Square</em> com essa função:</p>
+<pre><code>function Square(props) {
+  return (
+    &lt;button className=&#34;square&#34; onClick={props.onClick}&gt;
+      {props.value}
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>Você vai precisar mudar <code>this.props</code> para <code>props</code> ambas as vezes que ele aparece. Muitos componentes em suas apps poderão ser escritas como componentes funcionais: esses componentes tendem a ser mais fáceis de escrever e o React vai otimizá-los mais no futuro.</p>
+<p>Enquanto estávamos arrumando o código, também mudamos <code>onClick={() =&gt; props.onClick()}</code> para apenas <code>onClick={props.onClick}</code>, passando a função adiante é o suficiente para nosso exemplo. Note que <code>onClick={props.onClick()}</code> não vai funcionar pois ele vai chamar <code>props.onClick</code> imediatamente ao invés de passá-lo.</p>
+<h2><strong>Tomando as rodadas</strong></h2>
+<p>Um defeito óbvio no nosso jogo é que somente X pode jogar. Vamos arrumar isso.</p>
+<p>Vamos tornar padrão que o primeiro movimento seja do ‘X&#39;. Modifique o estado inicial no construtor do <em>Board</em>:</p>
+<pre><code>class Board extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      squares: Array(9).fill(null),
+      xIsNext: true,
+    };
+  }</code></pre>
+<p>Cada vez que mudarmos uma célula, devemos mudar <code>xIsNext</code> trocando o valor booleano ao salvar o estado. Agora atualize o <code>handleClick</code> do <em>Board</em> para modificar o valor de <code>xIsNext</code>:</p>
+<pre><code>  handleClick(i) {
+    const squares = this.state.squares.slice();
+    squares[i] = this.state.xIsNext ? &#39;X&#39; : &#39;O&#39;;
+    this.setState({
+      squares: squares,
+      xIsNext: !this.state.xIsNext,
+    });
+  }</code></pre>
+<p>Agora X e O tomam turnos. Depois, modificamos o texto de &#34;status&#34; no método <code>render</code> do <em>Board</em> para também mostrar quem é o próximo:</p>
+<pre><code>  render() {
+    const status = &#39;Próximo jogador: &#39; + (this.state.xIsNext ? &#39;X&#39; : &#39;O&#39;);
+
+    return (
+      // o resto não é modificado</code></pre>
+<p>Depois dessas mudanças você deve ter este componente <em>Board</em>:</p>
+<pre><code>class Board extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      squares: Array(9).fill(null),
+      xIsNext: true,
+    };
+  }
+
+  handleClick(i) {
+    const squares = this.state.squares.slice();
+    squares[i] = this.state.xIsNext ? &#39;X&#39; : &#39;O&#39;;
+    this.setState({
+      squares: squares,
+      xIsNext: !this.state.xIsNext,
+    });
+  }
+
+  renderSquare(i) {
+    return (
+      &lt;Square
+        value={this.state.squares[i]}
+        onClick={() =&gt; this.handleClick(i)}
+      /&gt;
+    );
+  }
+
+  render() {
+    const status = &#39;Next player: &#39; + (this.state.xIsNext ? &#39;X&#39; : &#39;O&#39;);
+
+    return (
+      &lt;div&gt;
+        &lt;div className=&#34;status&#34;&gt;{status}&lt;/div&gt;
+        &lt;div className=&#34;board-row&#34;&gt;
+          {this.renderSquare(0)}
+          {this.renderSquare(1)}
+          {this.renderSquare(2)}
+        &lt;/div&gt;
+        &lt;div className=&#34;board-row&#34;&gt;
+          {this.renderSquare(3)}
+          {this.renderSquare(4)}
+          {this.renderSquare(5)}
+        &lt;/div&gt;
+        &lt;div className=&#34;board-row&#34;&gt;
+          {this.renderSquare(6)}
+          {this.renderSquare(7)}
+          {this.renderSquare(8)}
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  }
+}</code></pre>
+<h2><strong>Declarando o vencedor</strong></h2>
+<p>Vamos mostrar quando o jogo é vencido. Adicione essa função auxiliar no final do arquivo:</p>
+<pre><code>function calculateWinner(squares) {
+  const lines = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+  for (let i = 0; i &lt; lines.length; i++) {
+    const [a, b, c] = lines[i];
+    if (squares[a] &amp;&amp; squares[a] === squares[b] &amp;&amp; squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+  return null;
+}</code></pre>
+<p>Você pode chamá-la no método <code>render</code> do <em>Board</em> para verificar se alguém venceu o jogo e modificar o texto de status para &#34;Vencedor: [X/O]&#34;.</p>
+<pre><code>render() {
+    const winner = calculateWinner(this.state.squares);
+    let status;
+    if (winner) {
+      status = &#39;Vencedor: &#39; + winner;
+    } else {
+      status = &#39;Próximo jogador: &#39; + (this.state.xIsNext ? &#39;X&#39; : &#39;O&#39;);
+    }
+
+    return (
+      // o resto não foi modificado</code></pre>
+<p>Agora pode alterar o <code>handleClick</code> no <em>Board</em> para ignorar o clique caso alguém tenha ganho o jogo ou se o quadrado já estiver preenchido:</p>
+<pre><code>  handleClick(i) {
+    const squares = this.state.squares.slice();
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+    squares[i] = this.state.xIsNext ? &#39;X&#39; : &#39;O&#39;;
+    this.setState({
+      squares: squares,
+      xIsNext: !this.state.xIsNext,
+    });
+  }</code></pre>
+<p>Parabéns! Você agora tem um jogo da velha funcional. E agora você sabe o básico do React. Então <em>você</em> provavelmente é o verdadeiro vencedor aqui.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Armazenando o histórico" duration="0">
+        <p>Vamos tornar possível revisitar estados antigos do jogo para que possamos vê-lo em movimentos anteriores. Já criamos uma nova lista squares a cada movimento, o que quer dizer que podemos armazenar facilmente o passado do jogo simultaneamente.</p>
+<p>Vamos armazenar um objeto como esse no estado:</p>
+<pre><code>history = [
+  {
+    squares: [
+      null, null, null,
+      null, null, null,
+      null, null, null,
+    ]
+  },
+  {
+    squares: [
+      null, null, null,
+      null, &#39;X&#39;, null,
+      null, null, null,
+    ]
+  },
+  // ...
+]</code></pre>
+<p>Queremos que um componente de alto nível <em>Game</em> seja responsável por exibir a lista de movimentos. Então quando movemos o estado do <em>Square</em> no <em>Board</em>, vamos fazer a mesma coisa do <em>Board</em> para o <em>Game</em> - então teremos todas as informações que precisamos no nível mais alto.</p>
+<p>Primeiro, definimos o estado inicial do <em>Game</em> adicionando um construtor nele:</p>
+<pre><code>class Game extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      history: [{
+        squares: Array(9).fill(null),
+      }],
+      xIsNext: true,
+    };
+  }
+
+  render() {
+    return (
+      &lt;div className=&#34;game&#34;&gt;
+        &lt;div className=&#34;game-board&#34;&gt;
+          &lt;Board /&gt;
+        &lt;/div&gt;
+        &lt;div className=&#34;game-info&#34;&gt;
+          &lt;div&gt;{/* status */}&lt;/div&gt;
+          &lt;ol&gt;{/* TODO */}&lt;/ol&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  }
+}</code></pre>
+<p>Então modifique o <em>Board</em> de tal forma que receba <code>squares</code> via props e seu próprio <code>onClick</code> especificado pelo <em>Game</em>, como fizemos com o <em>Square</em> antes. Você pode passar a localização de cada quadrado no receptor do click, para sabermos qual quadrado foi clicado. Aqui está uma lista dos passos necessários:</p>
+<ul>
+<li>Remover o construtor do <em>Board</em>.</li>
+<li>Substituir <code>this.state.squares[i]</code> com <code>this.props.squares[i]</code> no <code>renderSquare</code> do <em>Board</em>.</li>
+<li>Substituir <code>this.handleClick(i)</code> com <code>this.props.onClick(i)</code> no <code>renderSquare</code> do <em>Board</em>.</li>
+</ul>
+<p>Agora o componente <em>Board</em> inteiro se parece com isso:</p>
+<pre><code>class Board extends React.Component {
+  handleClick(i) {
+    const squares = this.state.squares.slice();
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+    squares[i] = this.state.xIsNext ? &#39;X&#39; : &#39;O&#39;;
+    this.setState({
+      squares: squares,
+      xIsNext: !this.state.xIsNext,
+    });
+  }
+
+  renderSquare(i) {
+    return (
+      &lt;Square
+        value={this.props.squares[i]}
+        onClick={() =&gt; this.props.onClick(i)}
+      /&gt;
+    );
+  }
+
+  render() {
+    const winner = calculateWinner(this.state.squares);
+    let status;
+    if (winner) {
+      status = &#39;Vencedor: &#39; + winner;
+    } else {
+      status = &#39;Próximo jogador: &#39; + (this.state.xIsNext ? &#39;X&#39; : &#39;O&#39;);
+    }
+
+    return (
+      &lt;div&gt;
+        &lt;div className=&#34;status&#34;&gt;{status}&lt;/div&gt;
+        &lt;div className=&#34;board-row&#34;&gt;
+          {this.renderSquare(0)}
+          {this.renderSquare(1)}
+          {this.renderSquare(2)}
+        &lt;/div&gt;
+        &lt;div className=&#34;board-row&#34;&gt;
+          {this.renderSquare(3)}
+          {this.renderSquare(4)}
+          {this.renderSquare(5)}
+        &lt;/div&gt;
+        &lt;div className=&#34;board-row&#34;&gt;
+          {this.renderSquare(6)}
+          {this.renderSquare(7)}
+          {this.renderSquare(8)}
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  }
+}</code></pre>
+<p>O método render do <em>Game</em> deve olhar para a entrada mais recente do histórico e calcular o estado do jogo:</p>
+<pre><code>  render() {
+    const history = this.state.history;
+    const current = history[history.length - 1];
+    const winner = calculateWinner(current.squares);
+
+    let status;
+    if (winner) {
+      status = &#39;Vencedor: &#39; + winner;
+    } else {
+      status = &#39;Próximo jogador: &#39; + (this.state.xIsNext ? &#39;X&#39; : &#39;O&#39;);
+    }
+
+    return (
+      &lt;div className=&#34;game&#34;&gt;
+        &lt;div className=&#34;game-board&#34;&gt;
+          &lt;Board
+            squares={current.squares}
+            onClick={(i) =&gt; this.handleClick(i)}
+          /&gt;
+
+        &lt;/div&gt;
+        &lt;div className=&#34;game-info&#34;&gt;
+          &lt;div&gt;{status}&lt;/div&gt;
+          &lt;ol&gt;{/* TODO */}&lt;/ol&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  }</code></pre>
+<p>Como o <em>Game</em> está renderizando o estado, podemos remover <code>&lt;div className=&#34;status&#34;&gt;{status}&lt;/div&gt;</code> e o código de cálculo do estado do método <code>render</code> do <em>Board</em>:</p>
+<pre><code>  render() {
+    return (
+      &lt;div&gt;
+        &lt;div className=&#34;board-row&#34;&gt;
+          {this.renderSquare(0)}
+          {this.renderSquare(1)}
+          {this.renderSquare(2)}
+        &lt;/div&gt;
+        &lt;div className=&#34;board-row&#34;&gt;
+          {this.renderSquare(3)}
+          {this.renderSquare(4)}
+          {this.renderSquare(5)}
+        &lt;/div&gt;
+        &lt;div className=&#34;board-row&#34;&gt;
+          {this.renderSquare(6)}
+          {this.renderSquare(7)}
+          {this.renderSquare(8)}
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  }</code></pre>
+<p>Em seguida, precisamos mover o método <code>handleClick</code> do <em>Board</em> para o <em>Game</em>. Você pode cortá-lo da classe <em>Board</em> e colá-lo na classe <em>Game</em>.</p>
+<p>Também precisamos mudá-lo um pouco, pois o estado do <em>Game</em> é estruturado de forma diferente. O <code>handleClick</code> do <em>Game</em> pode criar uma nova entrada na pilha concatenando um novo histórico e criando uma nova lista:</p>
+<pre><code>  handleClick(i) {
+    const history = this.state.history;
+    const current = history[history.length - 1];
+    const squares = current.squares.slice();
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+    squares[i] = this.state.xIsNext ? &#39;X&#39; : &#39;O&#39;;
+    this.setState({
+      history: history.concat([{
+        squares: squares,
+      }]),
+      xIsNext: !this.state.xIsNext,
+    });
+  }</code></pre>
+<p>Nesse ponto, o <em>Board</em> só precisa do <code>renderSquare</code> e <code>render</code>. A inicialização do estado e recepção do clique devem ambos vir do <em>Game</em>.</p>
+<h2><strong>Mostrando os movimentos</strong></h2>
+<p>Vamos mostrar os movimentos anteriores do jogo até então. Aprendemos que os elementos do React são objetos JavaScript que podemos armazenar ou passar por aí. Para renderizar múltiplos itens no React, passamos uma lista de elementos React. A forma mais comum de fazer isso é mapear de uma lista de dados. Vamos fazer isso no método <code>render</code> do <em>Game</em>:</p>
+<pre><code>  render() {
+    const history = this.state.history;
+    const current = history[history.length - 1];
+    const winner = calculateWinner(current.squares);
+
+    const moves = history.map((step, move) =&gt; {
+      const desc = move ?
+        &#39;Voltar ao movimento #&#39; + move :
+        &#39;Voltar ao começo do jogo&#39;;
+      return (
+        &lt;li&gt;
+          &lt;button onClick={() =&gt; this.jumpTo(move)}&gt;{desc}&lt;/button&gt;
+        &lt;/li&gt;
+      );
+    });
+
+    let status;
+    if (winner) {
+      status = &#39;Vencedor: &#39; + winner;
+    } else {
+      status = &#39;Próximo jogador: &#39; + (this.state.xIsNext ? &#39;X&#39; : &#39;O&#39;);
+    }
+
+    return (
+      &lt;div className=&#34;game&#34;&gt;
+        &lt;div className=&#34;game-board&#34;&gt;
+          &lt;Board
+            squares={current.squares}
+            onClick={(i) =&gt; this.handleClick(i)}
+          /&gt;
+        &lt;/div&gt;
+        &lt;div className=&#34;game-info&#34;&gt;
+          &lt;div&gt;{status}&lt;/div&gt;
+          &lt;ol&gt;{moves}&lt;/ol&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    );
+  }</code></pre>
+<p>Para cada passo no histórico, vamos criar um item <code>&lt;li&gt;</code> com um <code>&lt;button&gt;</code> dentro que tem um receptor de click que vamos implementar daqui a pouco. Com esse código, você deve ver uma lista de movimentos que foram feitos no jogo, junto com um aviso que diz:</p>
+<aside class="warning"><p><strong>Warning: Each child in an array or iterator should have a unique &#34;key&#34; prop. Check the render method of &#34;Game&#34;.</strong></p>
+</aside>
+<p>(Aviso: cada filho de uma lista ou iterador deve ter uma propriedade &#34;chave&#34; única. Verifique o método render do <em>Game</em>.)</p>
+<p>Vamos falar sobre o que esse aviso quer dizer.</p>
+<h2><strong>Chaves</strong></h2>
+<p>Quando renderizamos uma lista de itens, o React sempre armazena alguma informação sobre cada item na lsita. Se você renderiza um componente que tem estado, esse estado precisa ser armazenado - e independente de como você implementa seus componentes, o React armazena referência para os elementos nativos.</p>
+<p>Quando você atualiza uma lista, o React precisa determinar o que mudou. Você pode ter adicionado, removido, reorganizado, ou atualizado itens na lista.</p>
+<p>Imagine a transição de</p>
+<pre><code>&lt;li&gt;Alex: 7 tarefas restantes&lt;/li&gt;
+&lt;li&gt;Benjamin: 5 tarefas restantes&lt;/li&gt;</code></pre>
+<p>para</p>
+<pre><code>&lt;li&gt;Benjamin: 9 tarefas restantes&lt;/li&gt;
+&lt;li&gt;Claudia: 8 tarefas restantes&lt;/li&gt;
+&lt;li&gt;Alex: 5 tarefas restantes&lt;/li&gt;</code></pre>
+<p>Para o olho humano, parece que Alex e Benjamin trocaram de lugar e Claudia foi adicionada - mas o React é um programa de computador e não sabe o que você quer fazer. Como resultado, o React pede para especificar uma propriedade <em>key</em> em cada elemento da lista, um texto para diferenciar cada componente de seus pares. Nesse caso, <code>alex</code>, <code>benjamin</code> e <code>claudia</code> seriam boas chaves; se esses itens correspondem a objetos no banco de dados, o ID do registro geralmente é uma boa escolha:</p>
+<pre><code>&lt;li key={user.id}&gt;{user.name}: {user.taskCount} tarefas restantes&lt;/li&gt;</code></pre>
+<p><code>key</code> tem uma função especial que é reservada pelo React (assim como <code>ref</code>, um recurso mais avançado). Quando um elemento é criado, o React pega a propriedade <code>key</code> e a armazena no próprio elemento (nativo). Apesar de parecer parte da lista de props, ela não pode ser referenciada como <code>this.props.key</code>. O React usa a chave automaticamente para decidir que filhos atualizar; não há uma forma do próprio componente saber sua chave.</p>
+<p>Quando a lista é re-renderizada, o React pega cada elemento da nova versão e olha por uma propriedade chave que combine com a lista anterior. Quando a chave é adicionada ao conjunto, o componente é criado; quando a chave é removida, o componente é destruído. Chaves dizer ao React a identidade de cada componente, então ele pode manter o estado através de re-renderizações. Se você modificar a chave de um componente, ele será completamente destruído e recriado com um novo estado.</p>
+<p><strong>É fortemente recomendado que você atribua chaves sempre que criar listas dinâmicas.</strong> Se você não tem uma propriedade chave na mão, você deve considerar reestruturar seus dados para tê-la.</p>
+<p>Se você não especificar qualquer chave, o React vai avisá-lo que está usando o índice da lista como chave - que não é correto se você quiser reordenar os elementos da lista ou adicionar/remover itens em qualquer ao invés do final da lista. Explicitamente passando <code>key={i}</code> silencia o aviso mas mantém o mesmo problema, então não é recomendado na maior parte dos casos.</p>
+<p>Chaves de componentes não precisam ser globalmente únicas, somente em relações ao pares imediatos.</p>
+<h2><strong>Implementando a viagem no tempo</strong></h2>
+<p>Para nossa lista de movimentos, já temos um ID único para cada passo: o número do movimento quando ele acontece. No método <code>render</code> do <em>Game</em>, adicionar como chave <code>&lt;li key={move}&gt;</code> e o aviso sobre as chaves deve desaparecer:</p>
+<pre><code>    const moves = history.map((step, move) =&gt; {
+      const desc = move ?
+        &#39;Voltar ao movimento #&#39; + move :
+        &#39;Voltar ao começo do jogo&#39;;
+      return (
+        &lt;li key={move}&gt;
+          &lt;button onClick={() =&gt; this.jumpTo(move)}&gt;{desc}&lt;/button&gt;
+        &lt;/li&gt;
+      );
+    });</code></pre>
+<p>Clicando em qualquer botão gera um erro devido a <code>jumpTo</code> ser <em>undefined</em>. Vamos adicionar uma chave ao estado do <em>Game</em> indicando que passo estamos visualizando atualmente.</p>
+<p>Primeiro adicione <code>stepNumber: 0</code> ao estado inicial do construtor de <em>Game</em>:</p>
+<pre><code>class Game extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      history: [{
+        squares: Array(9).fill(null),
+      }],
+      stepNumber: 0,
+      xIsNext: true,
+    };
+  }</code></pre>
+<p>Em seguida, vamos definir o método <code>jumpTo</code> no <em>Game</em> para atualizar o estado. Também vamos atualizar <code>xIsNext</code>. Vamos definir <code>xIsNext</code> para verdadeiro se o índice do movimento for par.</p>
+<pre><code>  handleClick(i) {
+    // esse método não mudou
+  }
+
+  jumpTo(step) {
+    this.setState({
+      stepNumber: step,
+      xIsNext: (step % 2) === 0,
+    });
+  }
+
+  render() {
+    // esse método não mudou
+  }</code></pre>
+<p>Então atualize <code>stepNumber</code> quando um novo movimento é feito adicionando <code>stepNumber: history.length</code> à atualização do estado no <code>handleClick</code> do <em>Game</em>. Vamos atualizar o <code>handleClick</code> para ficar ciente do <code>stepNumber</code> quando ler o estado atual do tabuleiro atual para que você possa voltar no tempo e clicar no tabuleiro para criar uma nova entrada:</p>
+<pre><code>  handleClick(i) {
+    const history = this.state.history.slice(0, this.state.stepNumber + 1);
+    const current = history[history.length - 1];
+    const squares = current.squares.slice();
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+    squares[i] = this.state.xIsNext ? &#39;X&#39; : &#39;O&#39;;
+    this.setState({
+      history: history.concat([{
+        squares: squares
+      }]),
+      stepNumber: history.length,
+      xIsNext: !this.state.xIsNext,
+    });
+  }</code></pre>
+<p>Agora podemos modificar o <code>render</code> do <em>Game</em> para ler um estado do histórico:</p>
+<pre><code>  render() {
+    const history = this.state.history;
+    const current = history[this.state.stepNumber];
+    const winner = calculateWinner(current.squares);
+
+    // o resto não mudou</code></pre>
+<p>Se você clicar em qualquer botão agora, o tabuleiro deve imediatamente atualizar para exibir como o jogo se parecia naquele momento.</p>
+<h2><strong>Recapitulando</strong></h2>
+<p>Agora, temos um jogo da velha que:</p>
+<ul>
+<li>Permite você jogar o <em>jogo da velha</em>;</li>
+<li>Indica qual jogador ganhou o jogo;</li>
+<li>Armazena o histórico de movimentos durante o jogo;</li>
+<li>Permite os jogadores voltar no tempo para ver versões anteriores do jogo.</li>
+</ul>
+<p>Bom trabalho! Esperamos que você sinta que tem um bom entendimento de como o React funciona.</p>
+<p>Se você tiver tempo extra e quiser praticar novas habilidades, aqui estão algumas ideias para melhorias que você pode fazer, listadas em ordem de dificuldade:</p>
+<ol type="1" start="1">
+<li>Exibir a localização de cada movimento no formato (coluna, linha) no histórico.</li>
+<li>Exibir em negrito o item selecionado na lista de movimentos.</li>
+<li>Reescrever o <em>Board</em> para usar dois loops para criar os quadrados ao invés de <em>hard-codar</em> eles.</li>
+<li>Adicionar um botão para alternar a ordem dos movimentos em ascendente ou descendente.</li>
+<li>Quando alguém vencer, destacar os três quadrados que causaram o ganho.</li>
+<li>Quando ninguém vencer, mostrar uma mensagem sobre o resultado.</li>
+</ol>
+<p>Através deste tutorial, tocamos em um número de conceitos do React, incluindo elementos, componentes, props e estado. Para uma explicação mais detalhada de cada tópico, olhe na <a href="https://reactjs.org/docs/hello-world.html" target="_blank">documentação oficial</a> (em inglês). Para aprender mais sobre como definir componentes, verifique a <a href="https://reactjs.org/docs/react-component.html" target="_blank">referência da API React.Component</a>.</p>
 
 
       </google-codelab-step>
